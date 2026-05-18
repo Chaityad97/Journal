@@ -1,0 +1,51 @@
+// ai methods
+      aiSearchIdeas: async (query: string, k: number = 5) => {
+        const { ideas } = get();
+        set({ isAILoading: true, aiError: null });
+        
+        try {
+          const results = await AIService.searchIdeas(query, Object.values(ideas), k);
+          set({ aiSearchResults: results, isAILoading: false });
+          return results;
+        } catch (error) {
+          set({ aiError: error instanceof Error ? error.message : "Search failed", isAILoading: false });
+          return null;
+        }
+      },
+
+      aiGenerateInsights: async () => {
+        const { ideas } = get();
+        set({ isAILoading: true, aiError: null });
+        
+        try {
+          const insights = await AIService.generateInsights(Object.values(ideas));
+          set({ aiInsights: insights, isAILoading: false });
+          return insights;
+        } catch (error) {
+          set({ aiError: error instanceof Error ? error.message : "Insight generation failed", isAILoading: false });
+          return null;
+        }
+      },
+
+      aiInitializeEmbeddings: async () => {
+        const { ideas } = get();
+        try {
+          await AIService.initializeEmbeddings(Object.values(ideas));
+        } catch (error) {
+          set({ aiError: error instanceof Error ? error.message : "Embedding initialization failed" });
+        }
+      },
+
+      aiUpdateIdeaEmbedding: async (ideaId: string) => {
+        const { ideas } = get();
+        const idea = ideas[ideaId];
+        if (!idea) return;
+        
+        try {
+          await AIService.updateIdeaEmbedding(idea);
+        } catch (error) {
+          set({ aiError: error instanceof Error ? error.message : "Embedding update failed" });
+        }
+      },
+
+      aiClearError: () => set({ aiError: null }),
